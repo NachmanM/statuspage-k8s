@@ -1,13 +1,10 @@
+# First Thoughts
 DB's : redis / firebase / rds / mongoDB / dynamoDB / postgressql / mysql 
 CiCD : jenkins / argoCD 
 HA : k8s multi x
 Monitoring : promethues & grafana 
 logging : ekl / loki 
 Security : rules + firebase auth & 2fa
-
-
-
-
 
 what we need : 
 k8s to run application + webapp(status page) on a ec2 ,
@@ -25,7 +22,7 @@ the application itself
 
 
 
-simplify flow 
+# simplified flow 
 user talks to api gateway 
 api gateway talks to alb
 alb talks to k8s workers(pods)
@@ -57,7 +54,7 @@ we dont need nat because rds doesnt need internet
 
 properly settings up Security groups (IMPORTANT)
 
-
+# Security Groups
 SG-Control-Plane
 inbound:
 22(SSH) only from our ip
