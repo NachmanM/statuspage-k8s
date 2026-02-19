@@ -99,6 +99,7 @@ inbound handled by aws we use it as a "who can reach ALB" identity
 outbound:
 80/443 to SG-ALB
 
+# Setup
 control plane 
 t3.micro
 subnet public
