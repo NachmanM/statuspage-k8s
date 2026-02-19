@@ -22,3 +22,217 @@ the application itself
 7. autoscaler  when x+ usage/traffic scale when below x downscale 
 8. userdata executes a script on master node ```sudo kubeadm token create --print-join-command``` >> retrevies output and runs on newly made node . and for scaling master nodes ```sudo kubeadm init phase upload-certs --upload-certs``` to print join command with cert ```kubeadm token create --print-join-command --certificate-key <certificate-key>```
 9. 
+
+
+
+simplify flow 
+user talks to api gateway 
+api gateway talks to alb
+alb talks to k8s workers(pods)
+workers talks to rds
+
+
+1 t3.micro control plane (fixed)
+workers in ASG t3.micro min workers = 1 max workers = 3 
+no need for NAT Gateway 
+we put Nodes in public subnet 
+sg used to isolate everything
+rds in private subnet 
+redis runs in the cluster(cheaper than running elastiCache service)
+
+db we using rds with prostgressSQL
+cache/queue we use redis(in cluster to save money)
+auth: firebase auth + 2fa
+CI/CD we using jenkins to build image push to ecr and maybe argoCD to deploy
+monitoring we using prometheus + grafana (make it light to be able to run on t3.micro)
+
+for the cluster on ec2 using kubeadm
+vpc 
+2 public subnets for control plane & workers
+2 private subnets for rds and alb or vpc link(needs research)
+internet Gateway attached to vpc 
+route tables for public subnet 0.0.0.0/0 to Internet Gateway
+no nat gaveway 
+we dont need nat because rds doesnt need internet 
+
+properly settings up Security groups (IMPORTANT)
+
+
+SG-Control-Plane
+inbound:
+22(SSH) only from our ip
+6443(kubenetes api) only from workers 
+
+outbound:
+allow all
+
+SG-Workers
+inbound:
+22(not really needed) but if we want only from our ip
+10250(kubelet) from SG-Control-Plane
+30080(NodePort for Status Page) from SG-ALB
+
+outbound:
+allow all
+
+SG-RDS
+inbound:
+5432(what port is it ?) only from SG-Workers
+
+outbound:
+allow all
+
+SG-ALB
+2 options
+
+if we use internal ALB + VPC link
+inbound:
+80/443 from SG-VPC-Link
+
+if we use public ALB
+inbound: 
+80/443 from 0.0.0.0/0 (alb is reachable directly!!!)
+
+outbound:
+30080 to SG-Workers
+
+SG-VPC-Link(only for internal ALB)
+inbound handled by aws we use it as a "who can reach ALB" identity
+
+outbound:
+80/443 to SG-ALB
+
+control plane 
+t3.micro
+subnet public
+sg: SG-Control-Plane
+IAM role : allow ssm:GetParameter,ssm:PutParameter for the join cluster command & ECR read if we needed
+
+on control plane we need 
+continer runtime (docker)
+kubeadm
+disable swap(?)
+
+webapp as a deployment
+we containerize it and store the image in ec3
+build docker image for our status page
+push it to ecr
+
+create manifests 
+deployment we start with 1 replica on min=1 worker
+service NodePort will work with ASG & ALB
+
+expose it via API Gateway
+
+2 options
+
+option 1 
+API Gateway to VPC Link to internal ALB
+this makes it so ALB is not reachable to everyone 
+how ? 
+create internal ALB in vpc with private subnets
+create vpc link in API Gateway attached to SG-VPC-Link
+create API Gateway integration(?) pointing to ALB listner (ALB listen waits for output from API itergration)
+routes ANY/{proxy+}(?) to ALB itergration
+
+So only the API Gateway can reach ALB because ALB inbound is only the SG-VPC-Link
+
+option 2
+API Gateway to Public ALB URl (without VPC Link)
+makes it so ALB is publicly reachable not so good but auth still protects 
+
+
+
+making ALB connect to the API Gateway 
+
+ALB to ASG to NodePort
+how ?
+create ALB
+create Target group:
+Target type: instance
+port:30080
+Health check path : / or some script to check health
+attach Target group to the worker ASG
+makes it so when ASG adds instances they auto register to target group
+ALB Listen 80/443 forwards to the Target group
+
+ALB forwards to NodePort on all worker nodes
+
+small app we make 
+just an app the writes status / incidents to DB
+
+for k8s objects we need just Deployment & Service
+
+Application:
+App to DB:(RDS Postgress) Via SG-Workers to SG-RDS
+Status page to DB:(RDS Postgress) 
+Status page/app to Redis(in cluster)
+
+Autoscaler 
+scale up when traffic is high 
+scale down when traffic is low
+
+2 AutoScalers 
+
+1 for pod autoscaling 
+Horizontal Pod Autoscaler (HPA)
+with metrics server (cluster addon )
+Create HPA:
+scale pods up when CPU > X (example 70%)
+scale pods down when CPU < X
+
+1 for Node autoscaling
+Cluster autoscaler installed inside the cluster(cluster addon)
+configured to manage WOrker ASG (min=1 max=3)
+when pods cant schedule it wil increate ASG desired capacity
+
+will gives us 
+
+if Traffic is up -> HPA adds pods -> cluster runs out of room -> Cluster Autoscaler adds EC2 workers(Node)
+
+if Traffic is down -> HPA reduces pods -> Cluster Autoscaler removes EC2 workers(Node)
+
+USERDATA Script for automatically joining new worker nodes with kubeadm join command 
+
+we create join command with token from control plane and store it in ssm
+```kubeadm token create --print-join-command```
+
+we can make a token with long ttl so it doesnt break mid demo ttl= time to live
+
+worker userdata pulls from ssm and joins cluster
+in USERDATA(ASG Launch Template)
+install container runtime(docker) 
+install kubeadm/kubelet
+we fetch join command from ssm
+and execute it 
+
+for scaling master nodes
+we use 
+```kubeadm init phase upload-certs --upload-certs``` to print join command with cert ```kubeadm token create --print-join-command --control-plane --certificate-key <certificate-key>```
+
+for saving purposes i think we should keep control plane fixed at 1 node and not scale it 
+
+all the platform finishes(platform features)
+
+RDS
+RDS Postgres in Private subnet
+so its not publicly reachable
+SG allows only SG-Workers on port 5432
+
+CICD
+Jenkinds 
+builds docker image
+push to ecr
+
+and we can add argo cd that watches the git repo for manifests 
+and syncs to the cluster automatically 
+
+monitoring and logging
+Prometheus(with short retention)
+Grafana
+Loki + promtail(agent collects logs and labels them with metadata so we can look through(index& query) them efficiently )
+
+Security 
+Firebase Auth 2FA for the app
+k8s RBAC (so we dont jsut have kubeconfig everywhere)
+and our Properly made Security Groups 
