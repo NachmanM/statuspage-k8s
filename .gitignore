@@ -1,0 +1,62 @@
+# ========================
+# Terraform
+# ========================
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+.terraform/
+.terraform.lock.hcl
+
+# ========================
+# Ansible
+# ========================
+*.retry
+
+# ========================
+# Kubernetes
+# ========================
+*.kubeconfig
+
+# ========================
+# SSH / Secrets
+# ========================
+*.pem
+*.key
+*.crt
+*.csr
+id_rsa
+id_rsa.pub
+
+# ========================
+# OS / IDE
+# ========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================
+# Python (if used for scripts)
+# ========================
+__pycache__/
+*.pyc
+.env
+venv/
+
+# ========================
+# Logs
+# ========================
+*.log
