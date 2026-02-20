@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+spec:
+  selector:
+    matchLabels:
+      app: ingress 
+  template:
+    metadata:
+      name: ingress-pod
+      labels:
+        app: ingress 
+    spec:
+      serviceAccountName: ingress-sa
+      containers:
+        - name: ingress-cont 
+          image: registry.k8s.io/ingress-nginx/controller:v1.12.3
+          args:
+            - /nginx-ingress-controller
+            - --election-id=ingress-leader
+            - --controller-class=k8s.io/ingress-nginx
+            - --configmap=$(POD_NAMESPACE)/ingress-configmap
+          ports:
+            - name: http 
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

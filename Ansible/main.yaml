@@ -1,0 +1,17 @@
+- name: test
+  hosts: aws_ec2
+  become: true
+  become_user: root
+  vars:
+    kubernetes_pod_network:
+      cni: 'flannel'
+      cidr: '10.244.0.0/16'
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: Worked for {{ ansible_host }}
+
+  roles:
+  - role: geerlingguy.containerd
+  - role: geerlingguy.kubernetes
