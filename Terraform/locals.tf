@@ -1,39 +1,43 @@
 locals {
+  # Global config
+  global_tag = "nach-hi-status-page"
 
-  image_path    = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-  processor     = "x86_64"
+  # Init ec2 config
+  master_init_node = {
+    amount        = 1
+    instance_type = "t3.small"
+    tag           = "tf-nach-master-node"
+  }
+  userdata_path = "./scripts/userdata_init.sh"
+  image_id      = "ami-0970689b372f08997"
   key_pair_name = "nachman-home-nitzanim"
-  region        = "us-east-1"
-  global_tag    = "k8s-terraform-sandbox-sp"
-  vpc_name      = "Default VPC"
 
 
-  instances_config = {
-    master_node_sp = {
-      amount        = 3
-      instance_type = "t3.large"
-      tag           = "tf-sp-master-node"
-    }
-    worker_node_sp = {
-      amount        = 2
-      instance_type = "t3.medium"
-      tag           = "tf-sp-working-node"
+  # Security group config  
+  vpc_name = "Default VPC"
+
+  # Instance profile config
+  role_name = "nach-ecr-download-token"
+
+  # Launch template and ASG configs
+  nodes = {
+    master_node = {
+      instance_type = "t3.small"
+      ami_id        = "ami-0970689b372f08997"
+      node_tag      = "nach-hi-master-node"
+      key_pair_name = "nachman-home-nitzanim"
+      userdata_path = "./scripts/userdata_master_join.sh"
+      min_amount    = 3
+      max_amount    = 5
+    },
+    worker_node = {
+      instance_type = "t3.small"
+      ami_id        = "ami-027e099ec1ea5a1f9"
+      node_tag      = "nach-hi-worker-node"
+      key_pair_name = "nachman-home-nitzanim"
+      userdata_path = "./scripts/userdata_worker_join.sh"
+      min_amount    = 2
+      max_amount    = 5
     }
   }
-
-  # 1. Iterate over each role (master/worker).
-  # 2. Iterate 'amount' times using range().
-  # 3. Create a distinct object for every single instance needed.
-  instances_list = flatten([
-    for role, config in local.instances_config : [
-      for i in range(config.amount) : {
-        # Create a unique identifier for the map key later
-        key           = "${role}-${i}"
-        instance_type = config.instance_type
-        tag           = config.tag
-        role          = role
-      }
-    ]
-  ])
-
 }

@@ -3,16 +3,9 @@ variable "instance_config" {
   description = "EC2 instance config, has the keys: key, type, tag, role"
 }
 
-variable "image_path" {
+variable "image_id" {
   type        = string
-  description = "Image path for the EC2 AMI"
-  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-}
-
-variable "processor" {
-  type        = string
-  description = "The AMI processor eg x86_64"
-  default     = "x86_64"
+  description = "Image id for the EC2 AMI"
 }
 
 variable "key_pair_name" {
@@ -30,6 +23,16 @@ variable "global_tag" {
 variable "security_group_id" {
   type        = string
   description = "Security group id from the module sg-k8s, for the EC2 instance nodes"
+}
+
+variable "instance_profile_name" {
+  type        = string
+  description = "Instance profile name for the k8s nodes"
+}
+
+variable "userdata_content" {
+  type        = string
+  description = "The path for the user data script"
 }
 
 # variable "region" {
