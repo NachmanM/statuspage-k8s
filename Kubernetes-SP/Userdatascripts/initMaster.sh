@@ -40,6 +40,7 @@ kubeadm init \
   --control-plane-endpoint "${NlbDns}:6443" \
   --pod-network-cidr "${POD_CIDR}" \
   --upload-certs
+  --overwrite
 
 
 echo "==> Configuring kubectl"
