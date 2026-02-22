@@ -1,0 +1,123 @@
+#!/bin/bash
+set -euo pipefail
+
+# ----------------------
+# Config
+# ----------------------
+AwsRegion="us-east-1"
+ClusterName="NachHi"
+
+NlbDns="nach-test-b9fe6c22b189d165.elb.us-east-1.amazonaws.com"
+POD_CIDR="10.244.0.0/16"
+
+SsmJoinCpParam="/k8s/${ClusterName}/Join/ControlPlane"
+SsmJoinWorkerParam="/k8s/${ClusterName}/Join/Worker"
+
+export AWS_REGION="${AwsRegion}"
+
+exec > >(tee -a /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+echo "==> Starting init-master user-data script"
+date
+
+InitMasterPrivateIp="$(curl -fsSL http://169.254.169.254/latest/meta-data/local-ipv4)"
+echo "InitMasterPrivateIp=${InitMasterPrivateIp}"
+
+
+echo "==> Resetting kubeadm (idempotency)"
+kubeadm reset -f || true
+rm -rf /root/.kube || true
+rm -rf /etc/kubernetes || true
+
+
+echo "${InitMasterPrivateIp} ${NlbDns}" >> /etc/hosts
+echo "==> /etc/hosts now contains:"
+tail -n 5 /etc/hosts || true
+
+
+echo "==> kubeadm init"
+kubeadm init \
+  --control-plane-endpoint "${NlbDns}:6443" \
+  --pod-network-cidr "${POD_CIDR}" \
+  --upload-certs
+
+
+echo "==> Configuring kubectl"
+mkdir -p /root/.kube
+cp -f /etc/kubernetes/admin.conf /root/.kube/config
+chmod 600 /root/.kube/config
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+
+echo "==> Waiting for apiserver /livez to be OK"
+for i in $(seq 1 120); do
+  if curl -kfsS --max-time 2 "https://127.0.0.1:6443/livez" >/dev/null; then
+    echo "apiserver is live"
+    break
+  fi
+  sleep 2
+done
+
+
+echo "==> Installing Flannel"
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+
+
+echo "==> Waiting for node object to appear"
+NodeName="$(hostname -s)"
+
+for i in $(seq 1 120); do
+  if kubectl get node "${NodeName}" >/dev/null 2>&1; then
+    echo "Node exists: ${NodeName}"
+    break
+  fi
+  sleep 2
+done
+
+echo "==> Waiting for node to become Ready"
+for i in $(seq 1 180); do
+  if kubectl get node "${NodeName}" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True; then
+    echo "Node is Ready: ${NodeName}"
+    break
+  fi
+  sleep 2
+done
+
+echo "==> Current nodes:"
+kubectl get nodes -o wide
+
+echo "==> Waiting for kube-system pods to settle (coredns)"
+kubectl -n kube-system rollout status deployment/coredns --timeout=5m || true
+kubectl -n kube-system get pods -o wide || true
+
+
+echo "==> Generating join commands"
+WorkerJoinCommand="$(kubeadm token create --print-join-command)"
+CertificateKey="$(kubeadm init phase upload-certs --upload-certs 2>/dev/null | tail -n 1)"
+ControlPlaneJoinCommand="${WorkerJoinCommand} --control-plane --certificate-key ${CertificateKey}"
+
+echo "WorkerJoinCommand generated."
+echo "ControlPlaneJoinCommand generated."
+
+echo "==> Pushing join commands to SSM Parameter Store (SecureString)"
+aws ssm put-parameter \
+  --name "${SsmJoinWorkerParam}" \
+  --type "SecureString" \
+  --overwrite \
+  --value "${WorkerJoinCommand}" \
+  --region "${AwsRegion}"
+
+aws ssm put-parameter \
+  --name "${SsmJoinCpParam}" \
+  --type "SecureString" \
+  --overwrite \
+  --value "${ControlPlaneJoinCommand}" \
+  --region "${AwsRegion}"
+
+echo "==> SUCCESS: Join commands pushed to SSM"
+echo "Worker param: ${SsmJoinWorkerParam}"
+echo "CP param:     ${SsmJoinCpParam}"
+
+date
+echo "==> Done"
