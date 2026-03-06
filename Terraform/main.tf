@@ -24,8 +24,10 @@ module "launch_template_ASG" {
   global_tag = local.global_tag
   vpc_name   = local.vpc_name
 
-  instance_profile_name = module.instance_profile.worker_profile_name
   security_group_id     = module.sg-k8s.security_group_id
+
+  instance_profile_name = each.value["instance_profile"]
+  
 
 }
 

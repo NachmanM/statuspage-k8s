@@ -34,6 +34,7 @@ locals {
       userdata_path = "./scripts/userdata_master_join.sh"
       min_amount    = 3
       max_amount    = 5
+      instance_profile = module.instance_profile.control_plane_profile_name
     },
     worker_node = {
       instance_type = "t3.small"
@@ -43,6 +44,7 @@ locals {
       userdata_path = "./scripts/userdata_worker_join.sh"
       min_amount    = 2
       max_amount    = 5
+      instance_profile = module.instance_profile.worker_profile_name
     }
   }
 }
