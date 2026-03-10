@@ -1,55 +1,57 @@
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "SSMParameterAccess",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:PutParameter",
-                "ssm:GetParameter",
-                "ssm:DescribeParameters"
-            ],
-            "Resource": [
-                "arn:aws:ssm:us-east-1:*:parameter/k8s/NachHi/Join/ControlPlane",
-                "arn:aws:ssm:us-east-1:*:parameter/k8s/NachHi/Join/Worker"
-            ]
-        },
-        {
-            "Sid": "KMSAccessForDecryption",
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt",
-                "kms:GenerateDataKey",
-                "kms:DescribeKey"
-            ],
-            "Resource": "*" 
-        },
-        {
-            "Sid": "ECRAuth",
-            "Effect": "Allow",
-            "Action": [
-                "ecr:GetAuthorizationToken"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "ECRRepositoryAccess",
-            "Effect": "Allow",
-            "Action": [
-                "ecr:BatchGetImage",
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchCheckLayerAvailability"
-            ],
-            "Resource": "arn:aws:ecr:us-east-1:*:repository/StatusPage"
-        },
-        {
-            "Sid": "EC2ReadAccess",
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeInstances",
-                "ec2:DescribeRegions"
-            ],
-            "Resource": "*"
-        }
-    ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "K8sSSMDescribeGlobal",
+			"Effect": "Allow",
+			"Action": "ssm:DescribeParameters",
+			"Resource": "*"
+		},
+		{
+			"Sid": "K8sSSMParameterAccess",
+			"Effect": "Allow",
+			"Action": [
+				"ssm:PutParameter",
+				"ssm:GetParameter"
+			],
+			"Resource": [
+				"arn:aws:ssm:us-east-1:992382545251:parameter/k8s/NachHi/Join/*"
+			]
+		},
+		{
+			"Sid": "K8sKMSDecrypt",
+			"Effect": "Allow",
+			"Action": [
+				"kms:Decrypt",
+				"kms:GenerateDataKey",
+				"kms:DescribeKey"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "K8sECRAuth",
+			"Effect": "Allow",
+			"Action": "ecr:GetAuthorizationToken",
+			"Resource": "*"
+		},
+		{
+			"Sid": "K8sECRRepoAccess",
+			"Effect": "Allow",
+			"Action": [
+				"ecr:BatchGetImage",
+				"ecr:GetDownloadUrlForLayer",
+				"ecr:BatchCheckLayerAvailability"
+			],
+			"Resource": "arn:aws:ecr:us-east-1:*:repository/StatusPage"
+		},
+		{
+			"Sid": "K8sEC2Discovery",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:DescribeInstances",
+				"ec2:DescribeRegions"
+			],
+			"Resource": "*"
+		}
+	]
 }
