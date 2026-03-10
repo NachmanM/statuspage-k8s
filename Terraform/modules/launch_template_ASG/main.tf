@@ -17,7 +17,9 @@ resource "aws_launch_template" "nach-hi" {
     resource_type = "instance"
     tags = {
       env  = var.global_tag
+      Name = var.global_tag
       type = var.node_tag
+      Key  = "DoNotDelete"
     }
   }
 
@@ -29,9 +31,8 @@ resource "aws_launch_template" "nach-hi" {
   }
 
   # 3. Tags for the Template itself (NOT the instances)
-  tags = {
-    Name = var.global_tag
-  }
+
+    
 }
 
 

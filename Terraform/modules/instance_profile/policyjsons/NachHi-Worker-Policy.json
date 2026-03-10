@@ -2,27 +2,39 @@
 	"Version": "2012-10-17",
 	"Statement": [
 		{
+			"Sid": "K8sSSMDescribeGlobal",
+			"Effect": "Allow",
+			"Action": "ssm:DescribeParameters",
+			"Resource": "*"
+		},
+		{
+			"Sid": "K8sSSMParameterAccess",
 			"Effect": "Allow",
 			"Action": [
 				"ssm:GetParameter"
 			],
-			"Resource": "arn:aws:ssm:us-east-1:*:parameter/k8s/NachHi/Join/Worker"
+			"Resource": [
+				"arn:aws:ssm:us-east-1:992382545251:parameter/k8s/NachHi/Join/*"
+			]
 		},
 		{
+			"Sid": "K8sKMSDecrypt",
 			"Effect": "Allow",
 			"Action": [
-				"kms:Decrypt"
-			],
-			"Resource": "arn:aws:kms:us-east-1:*:alias/aws/ssm"
-		},
-		{
-			"Effect": "Allow",
-			"Action": [
-				"ecr:GetAuthorizationToken"
+				"kms:Decrypt",
+				"kms:GenerateDataKey",
+				"kms:DescribeKey"
 			],
 			"Resource": "*"
 		},
 		{
+			"Sid": "K8sECRAuth",
+			"Effect": "Allow",
+			"Action": "ecr:GetAuthorizationToken",
+			"Resource": "*"
+		},
+		{
+			"Sid": "K8sECRRepoAccess",
 			"Effect": "Allow",
 			"Action": [
 				"ecr:BatchGetImage",
@@ -30,6 +42,15 @@
 				"ecr:BatchCheckLayerAvailability"
 			],
 			"Resource": "arn:aws:ecr:us-east-1:*:repository/StatusPage"
+		},
+		{
+			"Sid": "K8sEC2Discovery",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:DescribeInstances",
+				"ec2:DescribeRegions"
+			],
+			"Resource": "*"
 		}
 	]
 }
