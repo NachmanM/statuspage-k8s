@@ -48,7 +48,7 @@ resource "aws_autoscaling_group" "k8s-nodes" {
 
   # Health Tracking
   health_check_type         = "ELB"
-  health_check_grace_period = 300
+  health_check_grace_period = 1200
 
   # Linking the Blueprint
   launch_template {

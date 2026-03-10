@@ -896,7 +896,7 @@ resource "aws_route53_record" "this" {
   type    = each.value.type
 
   allow_overwrite = try(each.value.allow_overwrite, false)
-  
+
   alias {
     name                   = aws_lb.this[0].dns_name
     zone_id                = aws_lb.this[0].zone_id

@@ -7,6 +7,9 @@ locals {
   # NLB Config
   nlb_name = "nach-hi-master"
 
+  # ALB config
+  alb_name = "nach-hi-alb"
+
   # Init ec2 config
   master_init_node = {
     amount        = 1
@@ -44,7 +47,7 @@ locals {
       userdata_path = "./scripts/userdata_worker_join.sh"
       min_amount    = 2
       max_amount    = 5
-      tg_arns       = []
+      tg_arns       = [module.alb.target_groups["nach_hi_worker_nodes"].arn]
     }
   }
 }

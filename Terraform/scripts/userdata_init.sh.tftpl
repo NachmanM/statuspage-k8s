@@ -118,5 +118,10 @@ echo "==> SUCCESS: Join commands pushed to SSM"
 echo "Worker param: ${SsmJoinWorkerParam}"
 echo "CP param:     ${SsmJoinCpParam}"
 
+
+echo "==> Cleaning up /etc/hosts and flushing DNS"
+sed -i "/${InitMasterPrivateIp} ${NlbDns}/d" /etc/hosts
+resolvectl flush-dns
+
 date
 echo "==> Done"

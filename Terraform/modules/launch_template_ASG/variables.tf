@@ -51,5 +51,5 @@ variable "vpc_name" {
 }
 
 variable "tg_arns" {
-  type = list
+  type = list(any)
 }

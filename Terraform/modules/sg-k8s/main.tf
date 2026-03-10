@@ -58,3 +58,39 @@ resource "aws_vpc_security_group_ingress_rule" "self_referencing_ingress" {
   ip_protocol                  = each.key
   referenced_security_group_id = aws_security_group.allow_http_ssh.id
 }
+
+resource "aws_vpc_security_group_ingress_rule" "allow_alb" {
+  security_group_id            = aws_security_group.allow_http_ssh.id
+  from_port                    = 30007
+  to_port                      = 30007
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.alb.id
+}
+
+resource "aws_security_group" "alb" {
+  name        = "nach-hi-sg-alb"
+  description = "Allow SSH and all local traffic, and open nodeport ports"
+  vpc_id      = data.aws_vpc.selected.id
+
+  # All inline ingress and egress blocks have been removed
+  # to prevent authoritative state conflicts.
+
+  tags = {
+    Name = "sg-${var.global_tag}"
+    env  = var.global_tag
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "alb" {
+  security_group_id = aws_security_group.alb.id
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb" {
+  security_group_id = aws_security_group.alb.id
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+}
