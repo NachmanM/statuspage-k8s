@@ -1,19 +1,4 @@
-# Build stage: frontend assets
-FROM node:20-alpine AS frontend-builder
-WORKDIR /build/statuspage/project-static
-
-COPY statuspage/project-static/package.json statuspage/project-static/yarn.lock* ./
-RUN yarn install --frozen-lockfile 2>/dev/null || npm install
-
-COPY statuspage/project-static/ .
-RUN yarn bundle 2>/dev/null || npm run bundle
-
-# Runtime stage: Django application
-FROM python:3.12-slim
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+FROM python:3.10-slim
 
 WORKDIR /app
 
@@ -29,16 +14,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy application code
-COPY statuspage/ ./statuspage/
-
-# Copy built frontend assets from builder
-COPY --from=frontend-builder /build/statuspage/project-static/dist ./statuspage/project-static/dist
+COPY . . 
 
 # Copy entrypoint
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-WORKDIR /app/statuspage
+WORKDIR /app
 
 EXPOSE 8000
 
