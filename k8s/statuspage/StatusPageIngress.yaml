@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: ingress-class
   rules:
-    - host: status.example.com  # <-- change to your domain
+    - host: sp.nach-hi.click
       http:
         paths:
           - path: /
