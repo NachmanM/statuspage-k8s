@@ -2,25 +2,33 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system deps for psycopg2 (runtime + build)
-COPY requirements.txt .
+# Install system deps + Node.js for frontend build
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
+    build-essential \
     libpq-dev \
-    gcc \
-    && pip install --no-cache-dir -r requirements.txt whitenoise \
-    && apt-get purge -y libpq-dev gcc \
-    && apt-get autoremove -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g yarn \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps
+COPY requirements.txt .
+RUN pip install -r requirements.txt && pip install gunicorn
 
 # Copy application code
 COPY . .
 
+# Build frontend assets
+WORKDIR /app/statuspage/project-static
+RUN yarn install && yarn bundle
+
+# Back to app root
+WORKDIR /app/statuspage
+
 # Copy entrypoint
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
-
-WORKDIR /app/statuspage
 
 EXPOSE 8000
 

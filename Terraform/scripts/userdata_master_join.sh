@@ -115,10 +115,10 @@ EOF
 chmod +x /usr/local/bin/update-ssm-join.sh
 
 # Install the cron job
-if ! crontab -l 2>/dev/null | grep -q "update-ssm-join.sh"; then
-    (crontab -l 2>/dev/null; echo "*/5 * * * * /usr/local/bin/update-ssm-join.sh > /var/log/update-ssm-join.log 2>&1") | crontab -
-    echo "==> Cron job configured."
-fi
+cat << 'EOF' > /etc/cron.d/update-ssm-join
+# m h dom mon dow user  command
+*/5 * * * * root /usr/local/bin/update-ssm-join.sh > /var/log/update-ssm-join.log 2>&1
+EOF
 
 date
 echo "==> Master Node deployment complete."
