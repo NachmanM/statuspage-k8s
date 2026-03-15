@@ -663,7 +663,7 @@ resource "aws_lb_target_group" "this" {
       healthy_threshold   = health_check.value.healthy_threshold
       interval            = health_check.value.interval
       matcher             = health_check.value.matcher
-      path                = health_check.value.path
+      path                = /health
       port                = health_check.value.port
       protocol            = health_check.value.protocol
       timeout             = health_check.value.timeout
