@@ -36,7 +36,6 @@ jobs:
     - name: build image
       run: docker build -f ./Application/Dockerfile ./Application --tag statuspage:latest
     - name: run container
-    - name: run container
       run: |
         docker run -d \
           --name test-container \
