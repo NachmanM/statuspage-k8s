@@ -8,4 +8,5 @@ data:
   DB_USER: "statuspage"
   DB_HOST: "postgres.statuspage.svc.cluster.local"
   REDIS_HOST: "redis.statuspage.svc.cluster.local"
+  REDIS_PORT: "6379"
 
