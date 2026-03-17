@@ -19,7 +19,7 @@ jobs:
     - name: Test container
       run: | # sleep to let the container start
         sleep 10
-        docker ps= -a
+        docker ps -a
         docker logs test-container
         curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8080 || exit 1
 
