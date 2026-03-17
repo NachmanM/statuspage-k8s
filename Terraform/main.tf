@@ -77,7 +77,7 @@ module "nlb" {
     api_server_tg_nach_hi = {
       name_prefix = "api-"
       protocol    = "TCP"
-      port        = 10248
+      port        = 6443
       target_type = "instance"
 
       create_attachment = false
