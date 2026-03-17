@@ -15,13 +15,11 @@ jobs:
     - name: build image
       run: docker build -f ./Application/Dockerfile ./Application --tag statuspage:latest
     - name: run container
-      run: docker run -d --name test-container -p 8080:8080 statuspage:latest
+      run: docker run -d --name test-container -p 8000:8000 statuspage:latest
     - name: Test container
-      run: | # sleep to let the container start
+      run: |
         sleep 10
-        docker ps -a
-        docker logs test-container
-        curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8080 || exit 1
+        curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8000 || exit 1
 
     - name: Stop container
       run: docker stop test-container
