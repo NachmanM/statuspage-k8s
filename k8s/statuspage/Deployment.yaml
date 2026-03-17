@@ -6,7 +6,7 @@ metadata:
   labels:
     workload: StatusPage-ui
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       workload: StatusPage-ui
