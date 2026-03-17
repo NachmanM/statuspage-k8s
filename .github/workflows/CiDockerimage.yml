@@ -7,25 +7,56 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: status-page
+          POSTGRES_USER: statuspage
+          POSTGRES_PASSWORD: statuspage
+        ports: [5432:5432]
+        options: >- # checks connections check every 10 seconds timeout of 5 seconds retries 5
+          --health-cmd "pg_isready -U statuspage"  
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:4.0
+        ports: [6379:6379]
+        options: >- #  redis-cli ping  check connection to container check every 10 seconds timines 5 retries 5
+          --health-cmd "redis-cli ping" 
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v4
     - name: build image
       run: docker build -f ./Application/Dockerfile ./Application --tag statuspage:latest
     - name: run container
-      run: docker run -d --name test-container -p 8000:8000 statuspage:latest
+      run: |
+        docker run -d \
+          --name test-container \
+          --network host \
+          -e DB_HOST=localhost \
+          -e DB_PORT=5432 \
+          -e DB_USER=statuspage \
+          -e DB_PASSWORD=statuspage \
+          -e DB_NAME=status-page \
+          statuspage:latest
     - name: Test container
       run: |
-        sleep 10
+        sleep 15
+        docker ps -a
+        docker logs test-container
         curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8000 || exit 1
-
     - name: Stop container
       run: docker stop test-container
 
   ecr:
-    needs: build # only when build pass if build doesnt pass ecr job gets skipped
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -33,8 +64,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ secrets.ACCESSKEY }}
+        aws-secret-access-key: ${{ secrets.SECRETACCESSKEY }}
         aws-region: us-east-1
 
     - name: Login to Amazon ECR
