@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress 
+metadata: 
+  name: ingress-rule-test
+  namespace: statuspage
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: ingress-class
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: statuspage-svc
+            port:
+              number: 80

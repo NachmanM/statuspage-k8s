@@ -42,7 +42,7 @@ spec:
               echo "redis is ready!"
       containers:
         - name: statuspage-frontend
-          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/status-page:0.7
+          image: 992382545251.dkr.ecr.us-east-1.amazonaws.com/nach-hi/status-page:latest
           ports:
             - containerPort: 8000
           envFrom:
@@ -69,3 +69,5 @@ spec:
               port: 8000
             initialDelaySeconds: 60
             periodSeconds: 30
+      imagePullSecrets:
+      - name: regcred

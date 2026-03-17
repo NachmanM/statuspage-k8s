@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:12-alpine
+          image: postgres:13-alpine
           ports:
             - containerPort: 5432
               name: postgres
@@ -60,12 +60,6 @@ spec:
               command: ["pg_isready", "-U", "statuspage"]
             initialDelaySeconds: 30
             periodSeconds: 20
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres-data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 5Gi
+      volumes:
+        - name: postgres-data
+          emptyDir: {}
