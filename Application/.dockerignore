@@ -1,0 +1,29 @@
+# Dependencies
+statuspage/project-static/node_modules
+**/__pycache__
+**/*.pyc
+*.pyo
+.venv
+venv
+env
+
+# Build artifacts (we rebuild these in the image)
+statuspage/project-static/dist
+
+# Git and IDE
+.git
+.gitignore
+.cursor
+.vscode
+*.swp
+*.swo
+
+# Docs and dev
+*.md
+docs/
+contrib/
+docker-compose*.yaml
+.gitignore
+
+# AWS CLI dist (if present)
+aws/

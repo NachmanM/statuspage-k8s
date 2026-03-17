@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+cd /app/statuspage
+
 echo "==> Running database migrations..."
 python manage.py migrate --no-input
 

@@ -16,10 +16,10 @@ resource "aws_launch_template" "nach-hi" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      env  = var.global_tag
+      env  = var.node_tag
       Name = var.global_tag
       type = var.node_tag
-      Key  = "DoNotDelete"
+      DoNotDelete  = true
     }
   }
 
