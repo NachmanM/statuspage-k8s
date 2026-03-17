@@ -19,7 +19,10 @@ jobs:
     - name: Test container
       run: | # sleep to let the container start
         sleep 10
-        curl --fail http://localhost:8080 || exit 1
+        docker ps= -a
+        docker logs test-container
+        curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:8080 || exit 1
+
     - name: Stop container
       run: docker stop test-container
 
@@ -37,9 +40,10 @@ jobs:
         aws-region: us-east-1
 
     - name: Login to Amazon ECR
+      id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build and push to ECR
       run: |
-        docker build -f ./Application/Dockerfile ./Application --tag ${{ steps.login-ecr.outputs.registry }}nach-hi/statuspage:${{ github.sha }}
-        docker push ${{ steps.login-ecr.outputs.registry }}nach-hi/statuspage:${{ github.sha }}
+        docker build -f ./Application/Dockerfile ./Application --tag ${{ steps.login-ecr.outputs.registry }}/nach-hi/statuspage:${{ github.sha }}
+        docker push ${{ steps.login-ecr.outputs.registry }}/nach-hi/statuspage:${{ github.sha }}
