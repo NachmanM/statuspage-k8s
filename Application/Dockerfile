@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt && pip install gunicorn
 
 
-# Copy application code
+# Copy application codee
 COPY . .
 COPY statuspage/statuspage/configuration_example.py /app/statuspage/statuspage/configuration.py
 
