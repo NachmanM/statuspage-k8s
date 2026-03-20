@@ -20,12 +20,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/cache/apt/archives/* \
     && rm -rf /tmp/*
 
-#  Install Python dep s
+# Install Python deps
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
+    pip install -r requirements.txt && \
     pip uninstall -y rq_scheduler || true && \
-    pip install --no-cache-dir --upgrade --force-reinstall "rq-scheduler>=0.14.0"
+    pip install --upgrade --force-reinstall "rq-scheduler>=0.14.0"
 
 # Verify rq_scheduler is importable
 RUN python -c "import rq, rq_scheduler; print('rq_scheduler OK')"
