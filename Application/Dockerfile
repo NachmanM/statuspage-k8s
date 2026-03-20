@@ -4,17 +4,31 @@ WORKDIR /app
 # Install system dependencies, Node.js, and Yarn
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    python3-dev \
     libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    libssl-dev \
+    zlib1g-dev \
     curl \
     ca-certificates \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/archives/* \
+    && rm -rf /tmp/*
 
-#  Install Python deps
+# Install Python deps
 COPY requirements.txt .
-RUN pip install -r requirements.txt && pip install gunicorn
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip uninstall -y rq_scheduler || true && \
+    pip install --no-cache-dir --upgrade --force-reinstall "rq-scheduler>=0.14.0"
+
+# Verify rq_scheduler is importable
+RUN python -c "import rq, rq_scheduler; print('rq_scheduler OK')"
 
 # Copy application codee
 COPY . .
@@ -30,6 +44,9 @@ RUN test -f dist/statuspage.js && test -f dist/statuspage.css \
 
 # Back to app root
 WORKDIR /app/statuspage
+
+# Create media dir so collectstatic doesn't fail on first run
+RUN mkdir -p media
 
 # Collect static files into the image at build time
 RUN python manage.py collectstatic --no-input
