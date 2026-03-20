@@ -9,8 +9,6 @@ mkdir -p media
 echo "==> Running database migrations..."
 python manage.py migrate --no-input
 
-# Static files are already collected at image build time — skip at runtime
-
 # Create superuser from env vars if set
 if [ -n "$SUPERUSER_NAME" ] && [ -n "$SUPERUSER_PASSWORD" ]; then
     echo "==> Creating superuser (if not exists)..."
@@ -22,6 +20,22 @@ if not User.objects.filter(username='${SUPERUSER_NAME}').exists():
     print('Superuser created.')
 else:
     print('Superuser already exists.')
+"
+fi
+
+# Remove TOTP devices for superuser to allow password-only login
+if [ -n "$SUPERUSER_NAME" ]; then
+    echo "==> Removing TOTP devices for superuser..."
+    python manage.py shell -c "
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from django.contrib.auth import get_user_model
+User = get_user_model()
+try:
+    user = User.objects.get(username='${SUPERUSER_NAME}')
+    deleted = TOTPDevice.objects.filter(user=user).delete()
+    print(f'TOTP devices removed: {deleted}')
+except User.DoesNotExist:
+    print('User not found, skipping TOTP removal.')
 "
 fi
 
