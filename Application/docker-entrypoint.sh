@@ -3,7 +3,7 @@ set -e
 
 cd /app/statuspage
 
-# Ensure media upload directory exists (not created at build time)
+# Ensure media upload directory exists (may be a mounted volume)
 mkdir -p media
 
 echo "==> Running database migrations..."
