@@ -41,7 +41,7 @@
 				"ecr:GetDownloadUrlForLayer",
 				"ecr:BatchCheckLayerAvailability"
 			],
-			"Resource": "arn:aws:ecr:us-east-1:*:repository/StatusPage"
+			"Resource": "arn:aws:ecr:us-east-1:*:repository/nach-hi/status-page"
 		},
 		{
 			"Sid": "K8sEC2Discovery",

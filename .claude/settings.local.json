@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"prometheus\\\\|grafana\\\\|loki\\\\|monitoring\" /c/Users/hi9841/Desktop/Kubernetes-SP --include=*.yaml --include=*.md --include=*.py)",
+      "Bash(docker --version)"
+    ]
+  }
+}
