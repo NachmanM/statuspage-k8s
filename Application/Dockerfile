@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && npm install -g yarn \
     && rm -rf /var/lib/apt/lists/*
 
-#  Install Python deps
+#  Install Python dep s
 COPY requirements.txt .
 RUN pip install -r requirements.txt && pip install gunicorn
 
