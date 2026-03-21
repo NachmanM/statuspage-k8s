@@ -113,6 +113,13 @@ module "alb" {
       evaluate_target_health = true
       allow_overwrite        = true
     }
+
+    "prom.nach-hi.click" = {
+      zone_id                = data.aws_route53_zone.primary.id
+      type                   = "A"
+      evaluate_target_health = true
+      allow_overwrite        = true
+    }
   }
 
   target_groups = {

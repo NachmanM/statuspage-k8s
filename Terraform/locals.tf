@@ -30,7 +30,7 @@ locals {
   # Launch template and ASG configs
   nodes = {
     master_node = {
-      instance_type = "t3.small"
+      instance_type = "t3.medium"
       ami_id        = "ami-0970689b372f08997"
       node_tag      = "nach-hi-master-node"
       key_pair_name = "nachman-home-nitzanim"
@@ -43,7 +43,7 @@ locals {
 
     },
     worker_node = {
-      instance_type = "t3.small"
+      instance_type = "t3.medium"
       ami_id        = "ami-027e099ec1ea5a1f9"
       node_tag      = "nach-hi-worker-node"
       key_pair_name = "nachman-home-nitzanim"
