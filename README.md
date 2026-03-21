@@ -24,20 +24,8 @@
 
 ## Architecture
 
-```
-GitHub Actions (CI) ──> AWS ECR ──> ArgoCD (CD) ──> Kubernetes Cluster
-                                                          │
-                                      ┌───────────────────┼───────────────────┐
-                                      │                   │                   │
-                                   Django App        PostgreSQL            Redis
-                                  (3 replicas)      (StatefulSet)       (Cache/Queue)
-                                      │
-                                nginx-ingress
-                                      │
-                                AWS ALB / NLB
-                                      │
-                                Route53 DNS
-```
+<img width="1362" height="774" alt="image" src="https://github.com/user-attachments/assets/6a8d2bf7-efd3-4d91-af9b-127dc1db5c1f" />
+
 
 **Traffic flow:** Requests enter via Route53 DNS -> AWS load balancer (ALB/NLB) -> nginx-ingress controller -> Django app (3 replicas). The app is backed by a PostgreSQL StatefulSet for persistence and Redis for caching and background job queuing via django-rq. ArgoCD continuously syncs the cluster state from this repository.
 
