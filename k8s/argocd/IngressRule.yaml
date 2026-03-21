@@ -6,7 +6,8 @@ metadata:
 spec:
   ingressClassName: ingress-class
   rules:
-  - http:
+  - host: sp.nach-hi.click
+    http:
       paths:
       - path: /argocd
         pathType: Prefix
