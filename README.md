@@ -34,7 +34,6 @@ GitHub Actions (CI) ──> AWS ECR ──> ArgoCD (CD) ──> Kubernetes Clust
 | **Containerization** | Docker (multi-stage build), AWS ECR                   |
 | **Orchestration**  | Kubernetes (kubeadm), nginx-ingress, ArgoCD              |
 | **IaC**            | Terraform (AWS provider) — EC2, ALB, NLB, ASG, Route53  |
-| **Config Mgmt**    | Ansible (geerlingguy.kubernetes, geerlingguy.containerd) |
 | **CI/CD**          | GitHub Actions → Docker build & test → ECR push          |
 | **Cloud**          | AWS (EC2, ALB, NLB, ECR, Route53, SSM, IAM)             |
 
