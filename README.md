@@ -24,7 +24,7 @@
 
 ## Architecture
 
-<img width="1292" height="733" alt="image" src="https://github.com/user-attachments/assets/654099a1-0904-4fc6-8fa9-ba4cf76b67cd" />
+<img width="1305" height="757" alt="image" src="https://github.com/user-attachments/assets/36fc5436-2029-4999-a1b5-785f3098cedd" />
 
 
 
