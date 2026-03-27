@@ -1,4 +1,4 @@
-# Kubernetes-SP Status Page on Kubernetes
+# Status Page on Kubernetes
 
 > A production-grade **Status Page** application deployed on a self-managed Kubernetes cluster running on AWS. Covers the full DevOps lifecycle: infrastructure provisioning, container orchestration, CI/CD, and GitOps.
 
